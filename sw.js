@@ -1,44 +1,47 @@
 const CACHE_NAME = 'cms-sekolah-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Urbanist:wght=400;500;600;700&display=swap'
-  // HAPUS BARIS TAILWIND CDN DI SINI AGAR TIDAK ERROR CORS
+const ASSETS_TO_CACHE = [
+    './',
+    './index.html',
+    // Jangan masukkan URL lengkap Google Fonts di sini jika menyebabkan CORS error
 ];
 
-// Pasang Service Worker dan simpan aset ke cache
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
-});
-
-// Aktivasi & pembersihan cache lama
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+// Pemasangan Service Worker
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
         })
-      );
-    })
-  );
+    );
 });
 
-// Strategi fetch: Coba jaringan dulu (Network First), jika gagal gunakan cache
-self.addEventListener('fetch', (e) => {
-  // Lewati request eksternal seperti Supabase API dan Tailwind CDN agar di-handle langsung oleh browser
-  if (e.request.url.includes('supabase.co') || e.request.url.includes('tailwindcss.com')) return;
+// Aktivasi Service Worker
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== CACHE_NAME) {
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+});
 
-  e.respondWith(
-    fetch(e.request).catch(() => {
-      return caches.match(e.request);
-    })
-  );
+// Strategi Fetch (Mengatasi error pada gambar image_ec9887.png)
+self.addEventListener('fetch', (event) => {
+    // Abaikan request dari Supabase atau font eksternal agar tidak bentrok dengan CORS
+    if (event.request.url.includes('supabase.co') || event.request.url.includes('fonts.googleapis.com')) {
+        return; // Biarkan browser mengambil langsung dari internet tanpa intervensi cache SW jika bermasalah
+    }
+
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            // Jika ada di cache, pakai cache. Jika tidak, ambil dari jaringan (fetch)
+            return response || fetch(event.request).catch(() => {
+                // Opsional: berikan fallback jika offline total dan asset tidak ada di cache
+            });
+        })
+    );
 });
