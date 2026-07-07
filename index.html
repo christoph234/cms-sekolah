@@ -547,35 +547,8 @@
 
                 // --- DATA DUMMY AWAL JIKA DATABASE SUPABASE & LOKAL KOSONG ---
                 if (combined.length === 0) {
-                    combined = [
-                        {
-                            id: "dummy-1",
-                            title: "Pelaksanaan ANBK 2026 Berjalan Lancar dan Tertib",
-                            description: "Seluruh siswa kelas 8 sukses mengikuti asesmen nasional berbasis komputer dengan sistem proteksi terbaru.",
-                            tag: "Akademik",
-                            views: 342,
-                            ctr: 8.5,
-                            created_at: new Date().toISOString()
-                        },
-                        {
-                            id: "dummy-2",
-                            title: "Tim Robotik Sekolah Raih Juara 1 Tingkat Nasional",
-                            description: "Inovasi robot pemilah sampah otomatis berbasis AI karya siswa berhasil menyisihkan puluhan kontestan lainnya.",
-                            tag: "Prestasi",
-                            views: 512,
-                            ctr: 12.4,
-                            created_at: new Date(Date.now() - 86400000).toISOString()
-                        },
-                        {
-                            id: "dummy-3",
-                            title: "Tips Menjaga Kesehatan Mental Remaja di Era Digital",
-                            description: "Artikel edukasi mengenai batasan screen-time dan pentingnya bersosialisasi secara nyata bagi siswa.",
-                            tag: "Edukasi",
-                            views: 189,
-                            ctr: 5.2,
-                            created_at: new Date(Date.now() - 172800000).toISOString()
-                        }
-                    ];
+                    // Diubah menjadi array kosong agar dashboard bersih tanpa artikel default saat awal/kosong
+                    combined = [];
                 }
 
                 await saveArticlesToLocal(combined);
@@ -624,27 +597,43 @@
                 switchTab('metrik');
                 fetchArticles();
             } catch (error) {
-                console.warn('Gagal mengirim ke server, menyimpan konten secara offline...', error);
-                const localId = generateLocalId();
-                const created_at = new Date().toISOString();
-                const localArticle = { id: localId, ...payload, created_at, _pending: true };
-
-                await putArticleLocal(localArticle);
-                await addPendingOp({ type: 'create', localId, payload, created_at });
-
-                const localData = await getArticlesFromLocal();
+                console.warn('Gagal memuat dari server, mengambil data lokal...', error);
+                let localData = await getArticlesFromLocal();
+                
+                if (localData.length === 0) {
+                    localData = [
+                        { 
+                            id: "artikel-anbk-sekolah", 
+                            title: "Pelaksanaan ANBK 2026 Berjalan Lancar", 
+                            description: "Sukses dengan sistem proteksi terbaru.", 
+                            tag: "Akademik", 
+                            views: 342, 
+                            ctr: 8.5, 
+                            created_at: new Date().toISOString() 
+                        },
+                        { 
+                            id: "prestasi-robotik-nasional", 
+                            title: "Tim Robotik Raih Juara 1 Nasional", 
+                            description: "Inovasi robot pemilah sampah otomatis.", 
+                            tag: "Prestasi", 
+                            views: 512, 
+                            ctr: 12.4, 
+                            created_at: new Date().toISOString() 
+                        }
+                    ];
+                }
+                
                 renderArticles(localData);
-
-                document.getElementById('formArticle').reset();
-                switchTab('metrik');
-                showNotification("Offline: konten disimpan di perangkat, akan dikirim otomatis saat online.");
+                showNotification("Mode Offline: Menampilkan data lokal.");
             }
         }
 
         async function deleteArticle(id) {
             if (!confirm("Apakah Anda yakin ingin menghapus konten ini?")) return;
 
-            if (String(id).startsWith('local-') || String(id).startsWith('dummy-')) {
+            // Jika ID diawali 'local-' atau bukan merupakan angka murni (Supabase menggunakan ID Int/UUID biasanya)
+            // Atau sesuaikan dengan format kata unik yang kamu gunakan
+            if (String(id).startsWith('local-') || id === 'artikel-anbk-sekolah' || id === 'prestasi-robotik-nasional') {
                 await deleteArticleLocalById(id);
                 const ops = await getPendingOps();
                 const op = ops.find(o => o.type === 'create' && o.localId === id);
