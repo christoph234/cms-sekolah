@@ -1,12 +1,18 @@
-const CACHE_NAME = 'cms-sekolah-v1';
+// File: sw.js
+
+// 1. Deklarasikan versi cache dan daftar aset di paling atas file
+const CACHE_NAME = 'cms-sekolah-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    // Jangan masukkan URL lengkap Google Fonts di sini jika menyebabkan CORS error
+    './image_ec9887.png',
+    './icon-192.png', // Tambahkan ikon 192px di sini
+    './icon-512.png'  // Tambahkan ikon 512px di sini
 ];
 
-// Pemasangan Service Worker
+// 2. Pemasangan Service Worker (Install)
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS_TO_CACHE);
@@ -14,7 +20,7 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Aktivasi Service Worker
+// 3. Aktivasi Service Worker (Activate)
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -25,22 +31,33 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-// Strategi Fetch (Mengatasi error pada gambar image_ec9887.png)
+// 4. Strategi Fetch
 self.addEventListener('fetch', (event) => {
-    // Abaikan request dari Supabase atau font eksternal agar tidak bentrok dengan CORS
-    if (event.request.url.includes('supabase.co') || event.request.url.includes('fonts.googleapis.com')) {
-        return; // Biarkan browser mengambil langsung dari internet tanpa intervensi cache SW jika bermasalah
+    const requestUrl = event.request.url;
+
+    // Abaikan request non-GET (Supabase auth/database mutasi)
+    if (event.request.method !== 'GET') {
+        return;
     }
 
+    // Abaikan API Supabase & Font Google dari cache
+    if (requestUrl.includes('supabase.co') || requestUrl.includes('fonts.googleapis.com')) {
+        return;
+    }
+
+    // Melayani file dari cache jika ada
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            // Jika ada di cache, pakai cache. Jika tidak, ambil dari jaringan (fetch)
-            return response || fetch(event.request).catch(() => {
-                // Opsional: berikan fallback jika offline total dan asset tidak ada di cache
+        caches.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+
+            return fetch(event.request).catch(() => {
+                // Offline fallback jika diperlukan
             });
         })
     );
