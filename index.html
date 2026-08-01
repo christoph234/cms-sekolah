@@ -31,287 +31,456 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen pb-28 md:pb-24">
 
-    <!-- Top Header -->
-    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <button id="btnDrawer" class="p-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all" aria-label="Menu">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+    <!-- ==================== MODAL LOGIN (MUNCUL PERTAMA KALI) ==================== -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
+            
+            <div class="text-center mb-6">
+                <span class="text-2xl font-bold tracking-tighter text-indigo-500">CMS<span class="text-white">SEKOLAH</span></span>
+                <p class="text-xs text-slate-400 mt-1">Silakan masuk untuk mengakses panel administrasi</p>
+            </div>
+
+            <div id="loginError" class="hidden mb-4 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs p-3 rounded-xl font-medium text-center"></div>
+
+            <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Email Instansi</label>
+                    <input type="email" id="loginEmail" required placeholder="admin.sekolah@instansi.sch.id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Kata Sandi</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <button type="submit" id="btnLoginSubmit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 mt-2 flex items-center justify-center gap-2">
+                    <span>Masuk ke System</span>
                 </button>
-                <span class="text-xl font-bold tracking-tighter text-indigo-500">CMS<span class="text-white">SEKOLAH</span></span>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <div id="networkStatus" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-xs font-semibold">
-                    <span id="networkDot" class="status-dot bg-emerald-500"></span>
-                    <span id="networkLabel">Online</span>
-                </div>
-                <button id="btnRefresh" onclick="fetchArticles()" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-indigo-400 transition-all" aria-label="Refresh Data">
-                    <svg id="iconRefresh" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Drawer Menu (Sidebar Desktop/Tablet) -->
-    <div id="overlay" class="fixed inset-0 bg-black/60 z-50 hidden opacity-0 transition-opacity duration-300"></div>
-    <aside id="drawer" class="fixed top-0 left-0 bottom-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
-            <span class="font-bold text-lg">Menu Utama</span>
-            <button id="btnCloseDrawer" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-        </div>
-        <nav class="p-4 space-y-1.5 flex-grow">
-            <button onclick="switchTab('beranda'); toggleDrawer(false)" id="drawer-tab-beranda" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-9-2v10a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span>Beranda Dashboard</span>
-            </button>
-            <button onclick="switchTab('metrik'); toggleDrawer(false)" id="drawer-tab-metrik" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"></path></svg>
-                <span>Metrik Konten</span>
-            </button>
-            <button onclick="switchTab('tambah'); toggleDrawer(false)" id="drawer-tab-tambah" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span>Tambah Konten</span>
-            </button>
-            <button onclick="switchTab('profil'); toggleDrawer(false)" id="drawer-tab-profil" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span>Profil Saya</span>
-            </button>
-            <button onclick="switchTab('pengaturan'); toggleDrawer(false)" id="drawer-tab-pengaturan" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>Pengaturan</span>
-            </button>
-        </nav>
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">Version 2.0.0 (PWA Enabled)</div>
-    </aside>
-
-    <main class="max-w-7xl mx-auto px-4 pt-8">
-        <!-- Tab Navigation (Desktop Only) -->
-        <div class="hidden md:flex mb-8 border-b border-slate-800 justify-between items-center">
-            <nav class="flex gap-8 overflow-x-auto no-scrollbar" aria-label="Tabs Metrics">
-                <button onclick="switchTab('beranda')" id="tab-beranda" class="tab-btn border-b-2 border-indigo-500 pb-4 px-1 text-sm font-bold text-indigo-400 whitespace-nowrap transition-all">Beranda</button>
-                <button onclick="switchTab('metrik')" id="tab-metrik" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Metrik Konten</button>
-                <button onclick="switchTab('tambah')" id="tab-tambah" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">+ Tambah Konten</button>
-                <button onclick="switchTab('profil')" id="tab-profil" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Profil Saya</button>
-                <button onclick="switchTab('pengaturan')" id="tab-pengaturan" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Pengaturan</button>
-            </nav>
-        </div>
-
-        <!-- Banner Notifikasi -->
-        <div id="undoBanner" class="hidden mb-6 bg-indigo-600 text-white px-6 py-4 rounded-2xl flex items-center justify-between shadow-lg" role="alert">
-            <span class="text-sm font-medium">Aksi berhasil dilakukan.</span>
-        </div>
-
-        <!-- TAB: BERANDA (DASHBOARD AKTIF) -->
-        <div id="content-beranda" class="tab-content active">
-            <!-- Ringkasan Statistik Selamat Datang -->
-            <div class="grid gap-6 md:grid-cols-3 mb-8">
-                <div class="bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/20 rounded-3xl p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total Publikasi</span>
-                        <div class="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </div>
-                    </div>
-                    <h2 id="dash-total" class="text-3xl font-extrabold text-white mb-1">--</h2>
-                    <p class="text-xs text-slate-400">Artikel dimuat di sistem</p>
-                </div>
-                <div class="bg-gradient-to-br from-emerald-900/20 to-slate-900 border border-slate-800 rounded-3xl p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Estimasi Pembaca</span>
-                        <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        </div>
-                    </div>
-                    <h2 id="dash-views" class="text-3xl font-extrabold text-white mb-1">--</h2>
-                    <p class="text-xs text-slate-400">Akumulasi seluruh views konten</p>
-                </div>
-                <div class="bg-gradient-to-br from-amber-900/20 to-slate-900 border border-slate-800 rounded-3xl p-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Rata-rata CTR</span>
-                        <div class="p-2 bg-amber-500/10 rounded-xl text-amber-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        </div>
-                    </div>
-                    <h2 id="dash-ctr" class="text-3xl font-extrabold text-white mb-1">-- %</h2>
-                    <p class="text-xs text-slate-400">Rasio klik tayang konten</p>
-                </div>
-            </div>
-
-            <!-- BAGIAN BARU: Daftar Artikel Sorotan/Terbaru di Dashboard -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-200 tracking-tight flex items-center gap-2">
-                        <span class="w-2 h-4 bg-indigo-500 rounded-sm inline-block"></span>
-                        Artikel Sorotan Terbaru
-                    </h3>
-                    <button onclick="switchTab('metrik')" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-all">Lihat Semua →</button>
-                </div>
-                
-                <div id="dashboard-articles-preview" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <!-- Artikel akan otomatis terisi secara dinamis melalui JavaScript -->
-                    <p class="col-span-full text-center text-slate-600 text-xs py-4 italic animate-pulse">Memuat pratinjau artikel...</p>
-                </div>
-            </div>
-
-            <!-- Banner Info -->
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="space-y-1 max-w-xl text-center md:text-left">
-                    <h4 class="text-md font-bold text-indigo-400">Pusat Manajemen Analitik & Informasi PWA</h4>
-                    <p class="text-xs text-slate-400">Sistem dilengkapi sinkronisasi otomatis IndexedDB lokal dan Cloud Supabase. Menulis konten dapat dilakukan kapan saja meskipun koneksi internet terputus.</p>
-                </div>
-                <button onclick="switchTab('tambah')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white transition-all whitespace-nowrap">Tulis Artikel Baru</button>
-            </div>
-        </div>
-
-        <!-- TAB: LIST DATA -->
-        <div id="content-metrik" class="tab-content">
-            <div id="pendingBanner" class="hidden mb-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold px-4 py-3 rounded-2xl">
-                <span id="pendingBannerText"></span>
-            </div>
-            <div id="articles-container" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <!-- Data di-render di sini -->
-            </div>
-        </div>
-
-        <!-- TAB: FORM TAMBAH DATA (CREATE) -->
-        <div id="content-tambah" class="tab-content">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xl mx-auto">
-                <h3 class="text-xl font-bold mb-4 text-indigo-400">Buat Konten Baru</h3>
-                <form id="formArticle" onsubmit="createArticle(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Judul</label>
-                        <input type="text" id="title" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Deskripsi</label>
-                        <textarea id="description" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500" rows="3"></textarea>
-                    </div>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Tag</label>
-                            <input type="text" id="tag" value="Pengumuman" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Views</label>
-                            <input type="number" id="views" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 font-bold uppercase mb-2">CTR (%)</label>
-                            <input type="number" step="0.1" id="ctr" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition-all mt-2">Simpan Konten</button>
-                    <p class="text-[11px] text-slate-500 text-center">Tanpa koneksi internet pun, konten akan tersimpan di perangkat dan otomatis dikirim saat online kembali.</p>
-                </form>
-            </div>
-        </div>
-
-        <!-- TAB: PROFIL USER (DAPAT DI-EDIT) -->
-        <div id="content-profil" class="tab-content">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xl mx-auto">
-                
-                <!-- Mode Tampilan Profil (Read-Only) -->
-                <div id="profile-view-mode" class="text-center">
-                    <div class="relative w-28 h-28 mx-auto mb-4">
-                        <div id="view-avatar" class="w-full h-full rounded-full bg-indigo-600 flex items-center justify-center text-4xl font-extrabold text-white shadow-xl shadow-indigo-600/20">
-                            AD
-                        </div>
-                        <span class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full"></span>
-                    </div>
-                    <h3 id="view-name" class="text-xl font-bold text-white">Administrator Utama</h3>
-                    <p id="view-email" class="text-xs text-indigo-400 font-medium mb-4">admin.sekolah@instansi.sch.id</p>
-                    
-                    <div class="grid grid-cols-2 gap-4 border-t border-b border-slate-800 py-4 my-6 text-left">
-                        <div>
-                            <p class="text-[10px] text-slate-500 uppercase font-bold">Jabatan Peran</p>
-                            <p id="view-role" class="text-sm font-semibold text-slate-200">Content Manager</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-500 uppercase font-bold">ID Petugas</p>
-                            <p id="view-id" class="text-sm font-mono font-semibold text-slate-200">CMS-SCH-2026</p>
-                        </div>
-                    </div>
-                    <button onclick="toggleProfileEdit(true)" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-semibold text-sm transition-all text-white">Edit Detail Profil</button>
-                </div>
-
-                <!-- Mode Edit Profil (Form input hidden secara default) -->
-                <div id="profile-edit-mode" class="hidden space-y-4">
-                    <h3 class="text-lg font-bold text-indigo-400 mb-2">Edit Detail Profil</h3>
-                    <form id="formEditProfile" onsubmit="saveProfile(event)" class="space-y-4 text-left">
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="col-span-2">
-                                <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Nama Lengkap</label>
-                                <input type="text" id="input-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Inisial Foto</label>
-                                <input type="text" id="input-avatar" maxlength="2" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-center font-bold focus:outline-none focus:border-indigo-500" placeholder="AD">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Email Instansi</label>
-                            <input type="email" id="input-email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Jabatan Peran</label>
-                                <input type="text" id="input-role" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">ID Petugas</label>
-                                <input type="text" id="input-id" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500">
-                            </div>
-                        </div>
-                        <div class="flex gap-3 pt-2">
-                            <button type="button" onclick="toggleProfileEdit(false)" class="w-1/2 py-2.5 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-xl font-semibold text-xs text-slate-400 transition-all">Batal</button>
-                            <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xs text-white transition-all shadow-lg shadow-indigo-600/20">Simpan Perubahan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB: PENGATURAN -->
-        <div id="content-pengaturan" class="tab-content">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center max-w-xl mx-auto">
-                <h3 class="text-xl font-bold mb-2 text-indigo-400">Pengaturan Preferensi</h3>
-                <p class="text-sm text-slate-400 mb-6">Halaman konfigurasi akun, API token Supabase, dan hak akses CMS.</p>
-                <div class="bg-slate-950 p-4 border border-slate-800 rounded-2xl text-left text-xs text-slate-400 font-mono space-y-2">
-                    <p>📦 LOCAL DATABASE: INDEXEDDB_OK</p>
-                    <p>🌐 CLOUD PROVIDER: SUPABASE_CONNECTED</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- BOTTOM NAVIGATION (Mobile Only) -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 px-4 py-2 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.4)]">
-        <div class="flex justify-around items-center max-w-md mx-auto">
-            <button onclick="switchTab('beranda')" id="mobile-tab-beranda" class="mobile-tab-btn flex flex-col items-center gap-1 text-indigo-400 font-bold transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-9-2v10a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span class="text-[11px] tracking-wide">Beranda</span>
-            </button>
-            <button onclick="switchTab('metrik')" id="mobile-tab-metrik" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"></path></svg>
-                <span class="text-[11px] tracking-wide">Metrik</span>
-            </button>
-            <button onclick="switchTab('tambah')" id="mobile-tab-tambah" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span class="text-[11px] tracking-wide">Tambah</span>
-            </button>
-            <button onclick="switchTab('profil')" id="mobile-tab-profil" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span class="text-[11px] tracking-wide">Profil</span>
-            </button>
+            </form>
+            <p class="text-[11px] text-slate-500 text-center mt-6">Akses terbatas untuk administrator terdaftar saja.</p>
         </div>
     </div>
 
+    <!-- MAIN APP WRAPPER (Sembunyi secara default sebelum login) -->
+    <div id="appContainer" class="hidden">
+        <!-- Top Header -->
+        <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <button id="btnDrawer" class="p-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all" aria-label="Menu">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    </button>
+                    <span class="text-xl font-bold tracking-tighter text-indigo-500">CMS<span class="text-white">SEKOLAH</span></span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div id="networkStatus" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700 text-xs font-semibold">
+                        <span id="networkDot" class="status-dot bg-emerald-500"></span>
+                        <span id="networkLabel">Online</span>
+                    </div>
+                    <button id="btnRefresh" onclick="fetchArticles()" class="p-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-indigo-400 transition-all" aria-label="Refresh Data">
+                        <svg id="iconRefresh" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
+                    </button>
+                    <!-- Tombol Log Out Header (Desktop) -->
+                    <button onclick="handleLogout()" class="hidden md:flex p-2 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-all text-xs font-semibold items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Drawer Menu Sidebar -->
+        <div id="overlay" class="fixed inset-0 bg-black/60 z-50 hidden opacity-0 transition-opacity duration-300"></div>
+        <aside id="drawer" class="fixed top-0 left-0 bottom-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <span class="font-bold text-lg">Menu Utama</span>
+                <button id="btnCloseDrawer" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            </div>
+            <nav class="p-4 space-y-1.5 flex-grow">
+                <button onclick="switchTab('beranda'); toggleDrawer(false)" id="drawer-tab-beranda" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-9-2v10a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span>Beranda Dashboard</span>
+                </button>
+                <button onclick="switchTab('metrik'); toggleDrawer(false)" id="drawer-tab-metrik" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"></path></svg>
+                    <span>Metrik Konten</span>
+                </button>
+                <button onclick="switchTab('tambah'); toggleDrawer(false)" id="drawer-tab-tambah" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Tambah Konten</span>
+                </button>
+                <button onclick="switchTab('profil'); toggleDrawer(false)" id="drawer-tab-profil" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span>Profil Saya</span>
+                </button>
+                <button onclick="switchTab('pengaturan'); toggleDrawer(false)" id="drawer-tab-pengaturan" class="drawer-btn w-full flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800/50 rounded-xl font-medium transition-all text-left">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Pengaturan</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-800 space-y-3">
+                <button onclick="handleLogout(); toggleDrawer(false)" class="w-full flex items-center justify-center gap-2 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs rounded-xl transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Keluar Akun</span>
+                </button>
+                <div class="text-[10px] text-slate-500 text-center">Version 2.0.0 (PWA Enabled)</div>
+            </div>
+        </aside>
+
+        <main class="max-w-7xl mx-auto px-4 pt-8">
+            <!-- Tab Navigation (Desktop Only) -->
+            <div class="hidden md:flex mb-8 border-b border-slate-800 justify-between items-center">
+                <nav class="flex gap-8 overflow-x-auto no-scrollbar" aria-label="Tabs Metrics">
+                    <button onclick="switchTab('beranda')" id="tab-beranda" class="tab-btn border-b-2 border-indigo-500 pb-4 px-1 text-sm font-bold text-indigo-400 whitespace-nowrap transition-all">Beranda</button>
+                    <button onclick="switchTab('metrik')" id="tab-metrik" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Metrik Konten</button>
+                    <button onclick="switchTab('tambah')" id="tab-tambah" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">+ Tambah Konten</button>
+                    <button onclick="switchTab('profil')" id="tab-profil" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Profil Saya</button>
+                    <button onclick="switchTab('pengaturan')" id="tab-pengaturan" class="tab-btn border-b-2 border-transparent pb-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-300 whitespace-nowrap transition-all">Pengaturan</button>
+                </nav>
+            </div>
+
+            <!-- Banner Notifikasi -->
+            <div id="undoBanner" class="hidden mb-6 bg-indigo-600 text-white px-6 py-4 rounded-2xl flex items-center justify-between shadow-lg" role="alert">
+                <span class="text-sm font-medium">Aksi berhasil dilakukan.</span>
+            </div>
+
+            <!-- TAB: BERANDA (DASHBOARD AKTIF) -->
+            <div id="content-beranda" class="tab-content active">
+                <div class="grid gap-6 md:grid-cols-3 mb-8">
+                    <div class="bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/20 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Total Publikasi</span>
+                            <div class="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                        </div>
+                        <h2 id="dash-total" class="text-3xl font-extrabold text-white mb-1">--</h2>
+                        <p class="text-xs text-slate-400">Artikel dimuat di sistem</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-900/20 to-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Estimasi Pembaca</span>
+                            <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </div>
+                        </div>
+                        <h2 id="dash-views" class="text-3xl font-extrabold text-white mb-1">--</h2>
+                        <p class="text-xs text-slate-400">Akumulasi seluruh views konten</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-amber-900/20 to-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Rata-rata CTR</span>
+                            <div class="p-2 bg-amber-500/10 rounded-xl text-amber-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            </div>
+                        </div>
+                        <h2 id="dash-ctr" class="text-3xl font-extrabold text-white mb-1">-- %</h2>
+                        <p class="text-xs text-slate-400">Rasio klik tayang konten</p>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-slate-200 tracking-tight flex items-center gap-2">
+                            <span class="w-2 h-4 bg-indigo-500 rounded-sm inline-block"></span>
+                            Artikel Sorotan Terbaru
+                        </h3>
+                        <button onclick="switchTab('metrik')" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-all">Lihat Semua →</button>
+                    </div>
+                    
+                    <div id="dashboard-articles-preview" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <p class="col-span-full text-center text-slate-600 text-xs py-4 italic animate-pulse">Memuat pratinjau artikel...</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-1 max-w-xl text-center md:text-left">
+                        <h4 class="text-md font-bold text-indigo-400">Pusat Manajemen Analitik & Informasi PWA</h4>
+                        <p class="text-xs text-slate-400">Sistem dilengkapi sinkronisasi otomatis IndexedDB lokal dan Cloud Supabase. Menulis konten dapat dilakukan kapan saja meskipun koneksi internet terputus.</p>
+                    </div>
+                    <button onclick="switchTab('tambah')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white transition-all whitespace-nowrap">Tulis Artikel Baru</button>
+                </div>
+            </div>
+
+            <!-- TAB: LIST DATA -->
+            <div id="content-metrik" class="tab-content">
+                <div id="pendingBanner" class="hidden mb-4 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold px-4 py-3 rounded-2xl">
+                    <span id="pendingBannerText"></span>
+                </div>
+                <div id="articles-container" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Data di-render di sini -->
+                </div>
+            </div>
+
+            <!-- TAB: FORM TAMBAH DATA (CREATE) -->
+            <div id="content-tambah" class="tab-content">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xl mx-auto">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-400">Buat Konten Baru</h3>
+                    <form id="formArticle" onsubmit="createArticle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Judul</label>
+                            <input type="text" id="title" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Deskripsi</label>
+                            <textarea id="description" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500" rows="3"></textarea>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Tag</label>
+                                <input type="text" id="tag" value="Pengumuman" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 font-bold uppercase mb-2">Views</label>
+                                <input type="number" id="views" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 font-bold uppercase mb-2">CTR (%)</label>
+                                <input type="number" step="0.1" id="ctr" value="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition-all mt-2">Simpan Konten</button>
+                        <p class="text-[11px] text-slate-500 text-center">Tanpa koneksi internet pun, konten akan tersimpan di perangkat dan otomatis dikirim saat online kembali.</p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: PROFIL USER -->
+            <div id="content-profil" class="tab-content">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-xl mx-auto">
+                    <div id="profile-view-mode" class="text-center">
+                        <div class="relative w-28 h-28 mx-auto mb-4">
+                            <div id="view-avatar" class="w-full h-full rounded-full bg-indigo-600 flex items-center justify-center text-4xl font-extrabold text-white shadow-xl shadow-indigo-600/20">
+                                AD
+                            </div>
+                            <span class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full"></span>
+                        </div>
+                        <h3 id="view-name" class="text-xl font-bold text-white">Administrator Utama</h3>
+                        <p id="view-email" class="text-xs text-indigo-400 font-medium mb-4">admin.sekolah@instansi.sch.id</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 border-t border-b border-slate-800 py-4 my-6 text-left">
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold">Jabatan Peran</p>
+                                <p id="view-role" class="text-sm font-semibold text-slate-200">Content Manager</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold">ID Petugas</p>
+                                <p id="view-id" class="text-sm font-mono font-semibold text-slate-200">CMS-SCH-2026</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleProfileEdit(true)" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-semibold text-sm transition-all text-white">Edit Detail Profil</button>
+                    </div>
+
+                    <div id="profile-edit-mode" class="hidden space-y-4">
+                        <h3 class="text-lg font-bold text-indigo-400 mb-2">Edit Detail Profil</h3>
+                        <form id="formEditProfile" onsubmit="saveProfile(event)" class="space-y-4 text-left">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Nama Lengkap</label>
+                                    <input type="text" id="input-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Inisial Foto</label>
+                                    <input type="text" id="input-avatar" maxlength="2" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white text-center font-bold focus:outline-none focus:border-indigo-500" placeholder="AD">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Email Instansi</label>
+                                <input type="email" id="input-email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">Jabatan Peran</label>
+                                    <input type="text" id="input-role" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 font-bold uppercase mb-1.5">ID Petugas</label>
+                                    <input type="text" id="input-id" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="button" onclick="toggleProfileEdit(false)" class="w-1/2 py-2.5 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-xl font-semibold text-xs text-slate-400 transition-all">Batal</button>
+                                <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xs text-white transition-all shadow-lg shadow-indigo-600/20">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PENGATURAN -->
+            <div id="content-pengaturan" class="tab-content">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center max-w-xl mx-auto">
+                    <h3 class="text-xl font-bold mb-2 text-indigo-400">Pengaturan Preferensi</h3>
+                    <p class="text-sm text-slate-400 mb-6">Halaman konfigurasi akun, API token Supabase, dan hak akses CMS.</p>
+                    <div class="bg-slate-950 p-4 border border-slate-800 rounded-2xl text-left text-xs text-slate-400 font-mono space-y-2 mb-6">
+                        <p>📦 LOCAL DATABASE: INDEXEDDB_OK</p>
+                        <p>🌐 CLOUD PROVIDER: SUPABASE_CONNECTED</p>
+                    </div>
+                    <button onclick="handleLogout()" class="px-6 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl text-rose-400 font-bold text-xs transition-all">
+                        Keluar dari Akun Ini
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- BOTTOM NAVIGATION (Mobile Only) -->
+        <div class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 px-4 py-2 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.4)]">
+            <div class="flex justify-around items-center max-w-md mx-auto">
+                <button onclick="switchTab('beranda')" id="mobile-tab-beranda" class="mobile-tab-btn flex flex-col items-center gap-1 text-indigo-400 font-bold transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-9-2v10a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="text-[11px] tracking-wide">Beranda</span>
+                </button>
+                <button onclick="switchTab('metrik')" id="mobile-tab-metrik" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"></path></svg>
+                    <span class="text-[11px] tracking-wide">Metrik</span>
+                </button>
+                <button onclick="switchTab('tambah')" id="mobile-tab-tambah" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-[11px] tracking-wide">Tambah</span>
+                </button>
+                <button onclick="switchTab('profil')" id="mobile-tab-profil" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-500 font-medium transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="text-[11px] tracking-wide">Profil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
     <script>
         // CONFIG SUPABASE
         const supabaseUrl = "https://odlkatyuppypjvvfvnxe.supabase.co";
         const supabaseKey = "sb_publishable_az6C9VTop4rOxdWc3-lX1g_Ylsv6gye";
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // --- MANAJEMEN AUTENTIKASI ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            const btnSubmit = document.getElementById('btnLoginSubmit');
+
+            errorEl.classList.add('hidden');
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Memverifikasi...";
+
+            try {
+                if (navigator.onLine) {
+                    // Coba auth online via Supabase
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                }
+                
+                // Simpan Sesi Login Lokal
+                const sessionUser = {
+                    email: email,
+                    isLoggedIn: true,
+                    loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('cms_auth_session', JSON.stringify(sessionUser));
+
+                // Update info profil bawaan sesuai email yang digunakan login
+                const nameFromEmail = email.split('@')[0].replace('.', ' ').toUpperCase();
+                const initial = nameFromEmail.substring(0,2);
+                const currentProfile = JSON.parse(localStorage.getItem('cms_user_profile') || '{}');
+                
+                if (!currentProfile.name) {
+                    localStorage.setItem('cms_user_profile', JSON.stringify({
+                        name: nameFromEmail || 'Administrator Utama',
+                        email: email,
+                        role: 'Content Manager',
+                        idPetugas: 'CMS-SCH-2026',
+                        avatar: initial || 'AD'
+                    }));
+                }
+
+                await checkAuthStatus();
+                showNotification("Berhasil masuk ke sistem!");
+            } catch (err) {
+                errorEl.innerText = err.message || "Gagal login. Periksa kembali email & password Anda.";
+                errorEl.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Masuk ke System";
+            }
+        }
+
+        async function handleLogout() {
+            if (confirm("Apakah Anda yakin ingin keluar dari aplikasi?")) {
+                try {
+                    if (navigator.onLine) {
+                        await supabaseClient.auth.signOut();
+                    }
+                } catch (err) {
+                    console.warn("SignOut Supabase error:", err);
+                } finally {
+                    localStorage.removeItem('cms_auth_session');
+                    await checkAuthStatus();
+                    showNotification("Anda telah keluar dari akun.");
+                }
+            }
+        }
+
+        // --- CHECK AUTH STATUS (DENGAN TRY-CATCH AMAN) ---
+async function checkAuthStatus() {
+    const modal = document.getElementById('loginModal');
+    const app = document.getElementById('appContainer');
+
+    let isLoggedIn = false;
+
+    // 1. Cek Session Supabase (dengan proteksi try-catch)
+    try {
+        if (navigator.onLine && window.supabaseClient) {
+            const { data, error } = await supabaseClient.auth.getSession();
+            if (!error && data && data.session) {
+                isLoggedIn = true;
+            }
+        }
+    } catch (err) {
+        console.warn("Gagal cek session online, beralih ke pengecekan lokal:", err);
+    }
+
+    // 2. Jika tidak ada session online, cek session lokal
+    if (!isLoggedIn) {
+        try {
+            const localSession = JSON.parse(localStorage.getItem('cms_auth_session') || 'null');
+            isLoggedIn = !!(localSession && localSession.isLoggedIn);
+        } catch (e) {
+            isLoggedIn = false;
+        }
+    }
+
+    // 3. Tampilkan / Sembunyikan Modal Login
+    if (isLoggedIn) {
+        modal.classList.add('hidden');
+        app.classList.remove('hidden');
+        loadProfileData();
+        fetchArticles();
+    } else {
+        // PAKSA MUNCULKAN MODAL LOGIN
+        modal.classList.remove('hidden');
+        app.classList.add('hidden');
+    }
+}
+
+// INITIAL LOAD
+window.onload = async () => {
+    try {
+        await initIndexedDB();
+    } catch (e) {
+        console.warn("IndexedDB init warning:", e);
+    }
+
+    updateNetworkStatus();
+    
+    // Panggil pengecekan Auth lebih dulu
+    await checkAuthStatus();
+
+    await updatePendingBanner();
+    if (navigator.onLine) syncPendingChanges();
+    switchTab('beranda'); 
+};
 
         // --- KONFIGURASI INDEXEDDB ---
         const dbName = "CMS_Sekolah_DB";
@@ -442,7 +611,7 @@
             const dashPreviewContainer = document.getElementById('dashboard-articles-preview');
             calculateDashboardMetrics(articles);
 
-            // 1. Render untuk Tab Metrik Konten (Semua Artikel Lengkap)
+            // 1. Render untuk Tab Metrik Konten
             if (articles.length === 0) {
                 container.innerHTML = `<p class="col-span-full text-center text-slate-500 py-8">Tidak ada data konten.</p>`;
             } else {
@@ -483,11 +652,11 @@
                 }).join('');
             }
 
-            // 2. Render untuk Tab Beranda Dashboard (Maksimal 3 Artikel Sorotan Terbaru)
+            // 2. Render untuk Tab Beranda Dashboard
             if (articles.length === 0) {
                 if(dashPreviewContainer) dashPreviewContainer.innerHTML = `<p class="col-span-full text-center text-slate-600 py-4 text-xs">Belum ada artikel sorotan.</p>`;
             } else {
-                const latestArticles = articles.slice(0, 3); // Ambil top 3 teratas
+                const latestArticles = articles.slice(0, 3);
                 if(dashPreviewContainer) {
                     dashPreviewContainer.innerHTML = latestArticles.map(article => {
                         return `
@@ -545,15 +714,8 @@
                 let combined = [...pendingCreates, ...filteredServerData]
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-                // --- DATA DUMMY AWAL JIKA DATABASE SUPABASE & LOKAL KOSONG ---
-                if (combined.length === 0) {
-                    // Diubah menjadi array kosong agar dashboard bersih tanpa artikel default saat awal/kosong
-                    combined = [];
-                }
-
                 await saveArticlesToLocal(combined);
                 renderArticles(combined);
-                showNotification("Data berhasil diperbarui.");
 
                 if (pendingOps.length > 0 && navigator.onLine) {
                     syncPendingChanges();
@@ -570,7 +732,6 @@
                 }
                 
                 renderArticles(localData);
-                showNotification("Mode Offline: Menampilkan data lokal.");
             } finally {
                 if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 600);
             }
@@ -597,43 +758,24 @@
                 switchTab('metrik');
                 fetchArticles();
             } catch (error) {
-                console.warn('Gagal memuat dari server, mengambil data lokal...', error);
-                let localData = await getArticlesFromLocal();
-                
-                if (localData.length === 0) {
-                    localData = [
-                        { 
-                            id: "artikel-anbk-sekolah", 
-                            title: "Pelaksanaan ANBK 2026 Berjalan Lancar", 
-                            description: "Sukses dengan sistem proteksi terbaru.", 
-                            tag: "Akademik", 
-                            views: 342, 
-                            ctr: 8.5, 
-                            created_at: new Date().toISOString() 
-                        },
-                        { 
-                            id: "prestasi-robotik-nasional", 
-                            title: "Tim Robotik Raih Juara 1 Nasional", 
-                            description: "Inovasi robot pemilah sampah otomatis.", 
-                            tag: "Prestasi", 
-                            views: 512, 
-                            ctr: 12.4, 
-                            created_at: new Date().toISOString() 
-                        }
-                    ];
-                }
-                
-                renderArticles(localData);
-                showNotification("Mode Offline: Menampilkan data lokal.");
+                console.warn('Penyimpanan online gagal, menyimpan secara offline...', error);
+                const localId = generateLocalId();
+                const localArticle = { ...payload, id: localId, created_at: new Date().toISOString(), _pending: true };
+
+                await putArticleLocal(localArticle);
+                await addPendingOp({ type: 'create', localId, payload, created_at: new Date().toISOString() });
+
+                showNotification("Mode Offline: Konten tersimpan lokal & akan dikirim saat online.");
+                document.getElementById('formArticle').reset();
+                switchTab('metrik');
+                renderArticles(await getArticlesFromLocal());
             }
         }
 
         async function deleteArticle(id) {
             if (!confirm("Apakah Anda yakin ingin menghapus konten ini?")) return;
 
-            // Jika ID diawali 'local-' atau bukan merupakan angka murni (Supabase menggunakan ID Int/UUID biasanya)
-            // Atau sesuaikan dengan format kata unik yang kamu gunakan
-            if (String(id).startsWith('local-') || id === 'artikel-anbk-sekolah' || id === 'prestasi-robotik-nasional') {
+            if (String(id).startsWith('local-') || id === 'dummy-1' || id === 'dummy-2') {
                 await deleteArticleLocalById(id);
                 const ops = await getPendingOps();
                 const op = ops.find(o => o.type === 'create' && o.localId === id);
@@ -726,9 +868,8 @@
             showNotification("Anda sedang offline. Perubahan akan disimpan di perangkat.");
         });
 
-        // Navigation Tab Interaction (Sinkron Atas, Bawah, Samping)
+        // Navigation Tab Interaction
         function switchTab(tabId) {
-            // 1. Desktop Tab Nav Reset
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.replace('border-indigo-500', 'border-transparent');
                 btn.classList.replace('text-indigo-400', 'text-slate-500');
@@ -743,7 +884,6 @@
                 activeBtn.classList.add('font-bold');
             }
 
-            // 2. Mobile Bottom Nav Reset
             document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
                 btn.classList.replace('text-indigo-400', 'text-slate-500');
                 btn.classList.replace('font-bold', 'font-medium');
@@ -754,7 +894,6 @@
                 activeMobileBtn.classList.replace('font-medium', 'font-bold');
             }
 
-            // 3. Drawer Sidebar Nav Reset
             document.querySelectorAll('.drawer-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-600/10', 'text-indigo-400');
                 btn.classList.add('text-slate-400');
@@ -765,13 +904,12 @@
                 activeDrawerBtn.classList.add('bg-indigo-600/10', 'text-indigo-400');
             }
 
-            // 4. Ubah Tampilan Konten Container
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             const targetContent = document.getElementById('content-' + tabId);
             if(targetContent) targetContent.classList.add('active');
         }
 
-        // Drawer Menu Controls
+        // Drawer Controls
         const drawer = document.getElementById('drawer');
         const overlay = document.getElementById('overlay');
         function toggleDrawer(open) {
@@ -789,7 +927,7 @@
         document.getElementById('btnCloseDrawer').addEventListener('click', () => toggleDrawer(false));
         overlay.addEventListener('click', () => toggleDrawer(false));
 
-        // --- LOGIKA MANAJEMEN PROFIL USER ---
+        // Profile Functions
         function toggleProfileEdit(isEditMode) {
             const viewMode = document.getElementById('profile-view-mode');
             const editMode = document.getElementById('profile-edit-mode');
@@ -811,7 +949,6 @@
 
         function saveProfile(e) {
             e.preventDefault();
-            
             const name = document.getElementById('input-name').value;
             const email = document.getElementById('input-email').value;
             const role = document.getElementById('input-role').value;
@@ -835,11 +972,11 @@
         }
 
         function updateProfileUI(data) {
-            document.getElementById('view-name').innerText = data.name;
-            document.getElementById('view-email').innerText = data.email;
-            document.getElementById('view-role').innerText = data.role;
-            document.getElementById('view-id').innerText = data.idPetugas;
-            document.getElementById('view-avatar').innerText = data.avatar;
+            if(document.getElementById('view-name')) document.getElementById('view-name').innerText = data.name;
+            if(document.getElementById('view-email')) document.getElementById('view-email').innerText = data.email;
+            if(document.getElementById('view-role')) document.getElementById('view-role').innerText = data.role;
+            if(document.getElementById('view-id')) document.getElementById('view-id').innerText = data.idPetugas;
+            if(document.getElementById('view-avatar')) document.getElementById('view-avatar').innerText = data.avatar;
         }
 
         // PWA Service Worker Registration
@@ -849,12 +986,11 @@
                 .catch(err => console.log("SW error:", err));
         }
 
-        // Initial Load
+        // INITIAL LOAD
         window.onload = async () => {
             await initIndexedDB();
             updateNetworkStatus();
-            loadProfileData(); 
-            await fetchArticles();
+            await checkAuthStatus(); // Cek status autentikasi terlebih dahulu
             await updatePendingBanner();
             if (navigator.onLine) syncPendingChanges();
             switchTab('beranda'); 
