@@ -6,7 +6,8 @@
     <title>CMS Sekolah - Analytics Hub</title>
     <meta name="description" content="Dashboard CMS interaktif dengan sistem tab dinamis dan navigasi akses cepat.">
     <link rel="icon" href="data:,">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4f46e5">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght=400;500;600;700&display=swap" rel="stylesheet">
@@ -998,11 +999,20 @@ window.onload = async () => {
 
         // Auto-sync loop setiap 30 detik
         setInterval(async () => {
-            if (navigator.onLine) {
-                const ops = await getPendingOps();
-                if (ops.length > 0) syncPendingChanges();
-            }
-        }, 30000);
+        if (navigator.onLine) {
+          const ops = await getPendingOps();
+          if (ops.length > 0) syncPendingChanges();
+        }
+      }, 30000);
+
+      // 2. Mendaftarkan file sw.js (CUKUP KODE INI SAJA UNTUK SW DI HTML)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Berhasil Didaftarkan! Scope:', reg.scope))
+            .catch(err => console.error('Pendaftaran Service Worker Gagal:', err));
+        });
+      }
     </script>
 </body>
 </html>
